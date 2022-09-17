@@ -1,5 +1,11 @@
 require('dotenv').config()
 const { ShardClient } = require('detritus-client')
+const express = require("express")
+const app = express()
+
+app.get("/", (req, res) => {
+    res.send("<h1>dToys is running</h1>")
+})
 
 import 'module-alias/register'
 import materialHandler from "./material/handler"
@@ -72,19 +78,20 @@ client.on('messageCreate', async ({ message }) => {
             }
         }
     }
-});
+})
 
-(async () => {
-    await client.run()
-    console.log(`\nClient has loaded with a shard count of ${client.shardCount} \n`)
-    client.gateway.setPresence({
-        activity: {
-            // What comes after our activity type, x.
-            name: '输入 @dToys help 查询',
-            // Type 0 sets our message to `Playing x`
-            type: 0,
-        },
-        // do-not-disturb us
-        status: 'dnd',
+app.listen(process.env.PORT || 3000,
+    async () => {
+        await client.run()
+        console.log(`\nClient has loaded with a shard count of ${client.shardCount} \n`)
+        client.gateway.setPresence({
+            activity: {
+                // What comes after our activity type, x.
+                name: '输入 @dToys help 查询',
+                // Type 0 sets our message to `Playing x`
+                type: 0,
+            },
+            // do-not-disturb us
+            status: 'dnd',
+        })
     })
-})()
