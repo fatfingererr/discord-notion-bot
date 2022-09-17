@@ -4,7 +4,10 @@
   "description": "Discord Notion Bot",
   "main": "index.js",
   "scripts": {
-    "start": "ts-node src/index.ts",
+    "start:build": "tsc -p tsconfig.json -w",
+    "start:run": "nodemon ./dist/index.js",
+    "start": "concurrently npm:start:*",
+    "dev": "ts-node src/index.ts",
     "watch": "tsc -p tsconfig.json -w",
     "test": "mocha -r ts-node/register \"tests/**/*.spec.ts\""
   },
@@ -29,5 +32,9 @@
   },
   "_moduleAliases": {
     "@": "src"
+  },
+  "devDependencies": {
+    "concurrently": "^7.4.0",
+    "nodemon": "^2.0.20"
   }
 }

@@ -1,56 +1,90 @@
-require('dotenv').config();
-const fs = require('fs');
-const path = require('path');
-const { CommandClient } = require('detritus-client');
+require('dotenv').config()
+const { ShardClient } = require('detritus-client')
 
-import 'module-alias/register';
-import materialHandler from "./material/handler";
-import utils from "./utils/message";
+import 'module-alias/register'
+import materialHandler from "./material/handler"
+import utils from "./utils/message"
 
 // 请避免把 TOKEN 直接写在机器人程序中, 避免骇客攻击与隐私泄漏
-const token = process.env.TOKEN;
-const commandClient = new CommandClient(token, {
-    prefix: '..',
-});
+const token = process.env.TOKEN
 
-commandClient.add({
-    name: 'list',
-    run: async (context) => {
-        return context.reply(await materialHandler.getNotionData());
+const client = new ShardClient(token, {
+    gateway: {
+        loadAllMembers: true,
     },
-});
+})
 
-
-commandClient.add({
-    name: 'help',
-    run: async (context, args) => {
-        return context.reply('ℹ️ 請使用指令 "@dToys add [关键词1]/[关键词2]/.../[关键词N], [素材碎片]" 新增素材碎片到 Notion 数据库');
-    },
-});
-
-
-commandClient.add({
-    name: 'add',
-    run: async (context, args) => {
-        const data = args.add.split(',')
+client.on('messageCreate', async ({ message }) => {
+    if (message.author.bot === false) {
+        const data = message.content.split(' ')
+        let cmd = ""
         if (data.length >= 2) {
-            let material = data[1];
+            cmd = data[1]
             for (var i = 2; i < data.length; i++) {
-                material = material + ',' + data[i]
+                cmd = cmd + ' ' + data[i]
             }
-            const keywords = data[0].split('/')
-            const channelId = context.message.channelId
-            const author = `${context.user.username}#${context.user.discriminator}`;
-            const discordUrl = utils.getMessageLink(context.message);
-            materialHandler.addMaterial(author, channelId, keywords, material, discordUrl)
-            return context.reply("✅ 新增成功! 见: https://ddaocommunity.notion.site/107f20d5949f419bb05759809c40542f");
         }
-        return context.reply('ℹ️ 請使用指令 "@dToys add [keyword1]/[keyword2], [素材碎片]" 新增素材碎片到 Notion 数据库');
+        if (cmd.replace(/\s/g, '') === 'help') {
+            const reply = await message.reply(':information_source: 请回复你想要存入素材库的信息，并依照此格式输入：\n\n@dToys [标题], [标签1]/[标签2]/.../[标签3]\n\n"@" 标注时请选择机器人 dToys，括号不用填，标题与标签的分隔逗点可为半形或全形。\n\n本提示将在 30 秒后自动删除')
+            setTimeout(async () => {
+                await reply.delete()
+            }, 30000)
+        }
+        else {
+            if (message.referencedMessage !== null) {
+                let splitChar = ','
+                let args = cmd.split(splitChar)
+                if (args.length == 0) {
+                    splitChar = '，'
+                    args = cmd.split(splitChar)
+                }
+                let keywords = []
+                let keywordStr = ''
+                if (args.length >= 2) {
+                    keywordStr = args[1]
+                    for (var i = 2; i < args.length; i++) {
+                        keywordStr = keywordStr + splitChar + args[i]
+                    }
+                    keywords = keywordStr.split('/')
+                }
+                const title = args[0]
+                const channel = client.channels.get(message.channelId)
+                const author = `${message.referencedMessage.author.username}#${message.referencedMessage.author.discriminator}`
+                const discordUrl = utils.getRefMessageLink(message, message.referencedMessage)
+                const material = message.referencedMessage.content
+                materialHandler.addMaterial(author, channel.name, title, message.referencedMessage.timestamp, keywords, material, discordUrl).then(async () => {
+                    const reply = await message.reply('✅ 素材碎片添加成功! 见: https://ddaocommunity.notion.site/107f20d5949f419bb05759809c40542f (5 秒信息删除)')
+                    setTimeout(async () => {
+                        await reply.delete()
+                    }, 5000)
 
-    },
+                }).catch(async () => {
+                    const reply = await message.reply(':negative_squared_cross_mark: 添加失败, 请联络 BOT 管理员协助处理 (30 秒后自动删除)')
+                    setTimeout(async () => {
+                        await reply.delete()
+                    }, 30000)
+                })
+            } else {
+                const reply = await message.reply(':warning: 您并没有回复选择要存入素材库的信息，请回复并同时下此指令 (10 秒后自动删除)')
+                setTimeout(async () => {
+                    await reply.delete()
+                }, 10000)
+            }
+        }
+    }
 });
 
 (async () => {
-    const client = await commandClient.run();
-    console.log(`\nClient has loaded with a shard count of ${client.shardCount} \n`);
-})();
+    await client.run()
+    console.log(`\nClient has loaded with a shard count of ${client.shardCount} \n`)
+    client.gateway.setPresence({
+        activity: {
+            // What comes after our activity type, x.
+            name: '输入 @dToys help 查询',
+            // Type 0 sets our message to `Playing x`
+            type: 0,
+        },
+        // do-not-disturb us
+        status: 'dnd',
+    })
+})()

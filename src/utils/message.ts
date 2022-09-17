@@ -1,8 +1,8 @@
-function getMessageLink(message: any): string {
-    return `https://discord.com/channels/${message.guildId}/${message.channelId}/${message.id}`
+function getRefMessageLink(message: any, refMessage: any): string {
+    return `https://discord.com/channels/${message.guildId}/${refMessage.channelId}/${refMessage.id}`
 }
 
 
 export default {
-    getMessageLink
+    getRefMessageLink
 }

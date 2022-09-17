@@ -12,7 +12,7 @@ async function getNotionData() {
   return JSON.stringify(data)
 }
 
-async function addMaterial(author: string, channelId: string, keywords: string[], material: string, discordUrl: string) {
+async function addMaterial(author: string, channelId: string, title: string, publishedTime: Date, keywords: string[], material: string, discordUrl: string) {
   const databaseId = notiondb.materialTable
   const kwSelection = []
   keywords.forEach((kw) => {
@@ -26,7 +26,7 @@ async function addMaterial(author: string, channelId: string, keywords: string[]
       database_id: databaseId
     },
     properties: {
-      'discord ID': {
+      'Discord ID': {
         type: 'select',
         select: {
           name: author
@@ -36,6 +36,21 @@ async function addMaterial(author: string, channelId: string, keywords: string[]
         type: 'select',
         select: {
           name: channelId
+        }
+      },
+      '标题': {
+        title: [
+          {
+            text: {
+              content: title,
+            },
+          },
+        ],
+      },
+      '发布时间': {
+        type: "date",
+        date: {
+          start: `${publishedTime.getUTCFullYear()}-${String(publishedTime.getUTCMonth()+1).padStart(2, '0')}-${String(publishedTime.getUTCDate()).padStart(2, '0')}`,
         }
       },
       '素材碎片': {
