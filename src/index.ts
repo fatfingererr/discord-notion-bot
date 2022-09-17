@@ -7,6 +7,7 @@ app.get("/", (req, res) => {
     res.send("<h1>dToys is running</h1>")
 })
 
+import fetch from 'node-fetch'
 import 'module-alias/register'
 import materialHandler from "./material/handler"
 import utils from "./utils/message"
@@ -94,4 +95,10 @@ app.listen(process.env.PORT || 3000,
             // do-not-disturb us
             status: 'dnd',
         })
+
+        setInterval(async () => {
+            const res = await fetch('http://ddao-dtoys.herokuapp.com')
+            const ret = await res.text()
+            console.log(ret)
+        }, 180000)
     })
