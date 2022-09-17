@@ -22,7 +22,7 @@ npm run start
 
 ## 机器人互动
 
-使用 `help`, `list` 与 `add` 与机器人进行互动，详细请见 `src/index.ts`
+使用 `help` 与机器人进行查询，详细请见 `src/index.ts`
 ## LICENSE
 
 MIT

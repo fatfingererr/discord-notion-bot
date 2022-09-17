@@ -21,7 +21,7 @@ const client = new ShardClient(token, {
 })
 
 client.on('messageCreate', async ({ message }) => {
-    if (message.author.bot === false) {
+    if (message.author.bot === false && message.content !== '') {
         const data = message.content.split(' ')
         let cmd = ""
         if (data.length >= 2) {
