@@ -1,1 +1,1 @@
-web: npm dev
+web: ts-node src/index.ts
