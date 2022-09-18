@@ -12,7 +12,7 @@ async function getNotionData() {
   return JSON.stringify(data)
 }
 
-async function addMaterial(author: string, channelId: string, title: string, publishedTime: Date, keywords: string[], material: string, discordUrl: string) {
+async function addMaterial(author: string, adder: string, channelId: string, title: string, publishedTime: Date, keywords: string[], material: string, discordUrl: string) {
   const databaseId = notiondb.materialTable
   const kwSelection = []
   keywords.forEach((kw) => {
@@ -30,6 +30,12 @@ async function addMaterial(author: string, channelId: string, title: string, pub
         type: 'select',
         select: {
           name: author
+        }
+      },
+      '添加人 ID': {
+        type: 'select',
+        select: {
+          name: adder
         }
       },
       'Channel ID': {

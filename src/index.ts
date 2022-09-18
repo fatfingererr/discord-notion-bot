@@ -41,7 +41,7 @@ client.on('messageCreate', async ({ message }) => {
             if (message.referencedMessage !== null) {
                 let splitChar = ','
                 let args = cmd.split(splitChar)
-                if (args.length == 0) {
+                if (args.length <= 1) {
                     splitChar = '，'
                     args = cmd.split(splitChar)
                 }
@@ -57,25 +57,26 @@ client.on('messageCreate', async ({ message }) => {
                 const title = args[0]
                 const channel = client.channels.get(message.channelId)
                 const author = `${message.referencedMessage.author.username}#${message.referencedMessage.author.discriminator}`
+                const adder =  `${message.author.username}#${message.author.discriminator}`
                 const discordUrl = utils.getRefMessageLink(message, message.referencedMessage)
                 const material = message.referencedMessage.content
-                materialHandler.addMaterial(author, channel.name, title, message.referencedMessage.timestamp, keywords, material, discordUrl).then(async () => {
-                    const reply = await message.reply('✅ 素材碎片添加成功! 见: https://ddaocommunity.notion.site/107f20d5949f419bb05759809c40542f (5 秒信息删除)')
-                    setTimeout(async () => {
-                        await reply.delete()
-                    }, 5000)
+                materialHandler.addMaterial(author, adder, channel.name, title, message.referencedMessage.timestamp, keywords, material, discordUrl).then(async () => {
+                    const reply = await message.reply('✅ 素材碎片添加成功! 见: https://ddaocommunity.notion.site/107f20d5949f419bb05759809c40542f')
+                    // setTimeout(async () => {
+                    //     await reply.delete()
+                    // }, 5000)
 
                 }).catch(async () => {
-                    const reply = await message.reply(':negative_squared_cross_mark: 添加失败, 请联络 BOT 管理员协助处理 (30 秒后自动删除)')
-                    setTimeout(async () => {
-                        await reply.delete()
-                    }, 30000)
+                    const reply = await message.reply(':negative_squared_cross_mark: 添加失败, 请联络 BOT 管理员协助处理')
+                    // setTimeout(async () => {
+                    //     await reply.delete()
+                    // }, 30000)
                 })
             } else {
-                const reply = await message.reply(':warning: 您并没有回复选择要存入素材库的信息，请回复并同时下此指令 (10 秒后自动删除)')
-                setTimeout(async () => {
-                    await reply.delete()
-                }, 10000)
+                const reply = await message.reply(':warning: 您并没有回复选择要存入素材库的信息，请回复并同时下此指令')
+                // setTimeout(async () => {
+                //     await reply.delete()
+                // }, 10000)
             }
         }
     }
