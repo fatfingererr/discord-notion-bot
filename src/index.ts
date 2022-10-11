@@ -60,20 +60,28 @@ client.on('messageCreate', async ({ message }) => {
                 const adder =  `${message.author.username}#${message.author.discriminator}`
                 const discordUrl = utils.getRefMessageLink(message, message.referencedMessage)
                 const material = message.referencedMessage.content
-                materialHandler.addMaterial(author, adder, channel.name, title, message.referencedMessage.timestamp, keywords, material, discordUrl).then(async () => {
-                    const reply = await message.reply('✅ 素材碎片添加成功! 见: https://ddaocommunity.notion.site/107f20d5949f419bb05759809c40542f')
-                    // setTimeout(async () => {
-                    //     await reply.delete()
-                    // }, 5000)
+                if (author == adder) {
+                    materialHandler.addMaterial(author, adder, channel.name, title, message.referencedMessage.timestamp, keywords, material, discordUrl).then(async () => {
+                        const reply = await message.reply('✅ 素材碎片添加成功! 见: https://ddaocommunity.notion.site/1dd8950a765c4b479d833409cdde13f8')
+                        // setTimeout(async () => {
+                        //     await reply.delete()
+                        // }, 5000)
 
-                }).catch(async () => {
-                    const reply = await message.reply(':negative_squared_cross_mark: 添加失败, 请联络 BOT 管理员协助处理')
-                    // setTimeout(async () => {
-                    //     await reply.delete()
-                    // }, 30000)
-                })
+                    }).catch(async () => {
+                        const reply = await message.reply(':negative_squared_cross_mark: 添加失败, 请联络 BOT 管理员协助处理')
+                        // setTimeout(async () => {
+                        //     await reply.delete()
+                        // }, 30000)
+                    })
+                } else if (title == 'suggest') {
+                    const authorid = message.referencedMessage.author.id
+                    const addername = message.author.username
+                    const reply = await quotation.resolved.reply(`<@${authorid}> ${addername}觉得这段话太棒了，想请你添加`)
+                } else {
+                    const reply = await message.reply(':negative_squared_cross_mark: 添加失败，不可添加非本人发言')
+                }
             } else {
-                const reply = await message.reply(':warning: 您并没有回复选择要存入素材库的信息，请回复并同时下此指令')
+                const reply = await message.reply(':warning: 您并没有回复选择要存入素材库的信息 ，请回复并同时下此指令')
                 // setTimeout(async () => {
                 //     await reply.delete()
                 // }, 10000)
