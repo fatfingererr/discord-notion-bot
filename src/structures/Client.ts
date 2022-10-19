@@ -2,7 +2,8 @@ import {
     ApplicationCommandDataResolvable,
     Client,
     ClientEvents,
-    Collection
+    Collection,
+    GatewayIntentBits
 } from "discord.js";
 import { CommandType } from "../typings/Command";
 import glob from "glob";
@@ -16,7 +17,12 @@ export class ExtendedClient extends Client {
     commands: Collection<string, CommandType> = new Collection();
 
     constructor() {
-        super({ intents: 32767 });
+        super({ intents: [
+            GatewayIntentBits.DirectMessages,
+            GatewayIntentBits.Guilds,
+            GatewayIntentBits.GuildMessages,
+            GatewayIntentBits.MessageContent,
+        ] });
     }
 
     start() {
@@ -30,10 +36,10 @@ export class ExtendedClient extends Client {
     async registerCommands({ commands, guildId }: RegisterCommandsOptions) {
         if (guildId) {
             this.guilds.cache.get(guildId)?.commands.set(commands);
-            console.log(`Registering commands to ${guildId}`);
+            console.log(`Registering commands to ${guildId}.`);
         } else {
             this.application?.commands.set(commands);
-            console.log("Registering global commands");
+            console.log("Registering global commands.");
         }
     }
 
@@ -55,7 +61,7 @@ export class ExtendedClient extends Client {
         this.on("ready", () => {
             this.registerCommands({
                 commands: slashCommands,
-                guildId: process.env.guildId
+                // guildId: process.env.guildId
             });
         });
 

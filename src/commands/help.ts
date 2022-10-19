@@ -3,7 +3,7 @@ const wait = require('node:timers/promises').setTimeout;
 
 export default new Command({
     name: "help",
-    description: "查看bot食用指南",
+    description: "查看bot的食用指南",
     run: async ({ interaction }) => {
         await interaction.deferReply({ ephemeral: true });
         await interaction.editReply({ 
