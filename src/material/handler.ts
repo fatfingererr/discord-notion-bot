@@ -1,10 +1,10 @@
-import notiondb from '../config/notiondb'
-
 const { Client } = require('@notionhq/client')
-const notion = new Client({ auth: process.env.NOTION_API_KEY })
+const notion = new Client({ auth: process.env.notionKey })
+const materialTable = process.env.materialTable
+const relationTable = process.env.relationTable
 
 async function getNotionData() {
-  const databaseId = notiondb.materialTable
+  const databaseId = materialTable
   const response = await notion.databases.query({
     database_id: databaseId,
   })
@@ -12,8 +12,8 @@ async function getNotionData() {
   return JSON.stringify(data)
 }
 
-async function addMaterial(author: string, adder: string, channelId: string, title: string, publishedTime: Date, keywords: string[], material: string, discordUrl: string) {
-  const databaseId = notiondb.materialTable
+async function addMaterial(author: string, adder: string, guildId: string, channelId: string, title: string, publishedTime: Date, keywords: string[], material: string, discordUrl: string) {
+  const databaseId = materialTable
   const kwSelection = []
   keywords.forEach((kw) => {
     kwSelection.push({
@@ -21,9 +21,41 @@ async function addMaterial(author: string, adder: string, channelId: string, tit
     })
   })
 
+  const authorPageList = await notion.databases.query({
+    database_id: relationTable,
+    filter: {
+      "property": "Discord ID",
+      "rich_text": {
+        "equals": author
+      }
+    }
+  })
+
+  var authorPage;
+  if (authorPageList.results.length == 0) {
+    authorPage = await notion.pages.create({
+      parent: {
+        database_id: relationTable
+      },
+      properties: {
+        "Discord ID": {
+          title: [
+            {
+              text: {
+                content: author
+              }
+            }
+          ]
+        }
+      }
+    })
+  } else {
+    authorPage = authorPageList.results[0]
+  }
+
   const ret = await notion.pages.create({
     parent: {
-      database_id: databaseId
+      database_id: materialTable
     },
     properties: {
       'Discord ID': {
@@ -32,10 +64,21 @@ async function addMaterial(author: string, adder: string, channelId: string, tit
           name: author
         }
       },
+      'Author': {
+        "relation":[{
+            "id": authorPage.id
+          }]
+      },
       '添加人 ID': {
         type: 'select',
         select: {
           name: adder
+        }
+      },
+      'Guild ID': {
+        type: 'select',
+        select: {
+          name: guildId
         }
       },
       'Channel ID': {
